@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose'
 
 export const SESSION_COOKIE = 'journey_session'
-export const SESSION_MAX_AGE = 60 * 60 * 24 * 30 // 30일
+export const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7일
 
 function secret() {
   const s = process.env.SESSION_SECRET

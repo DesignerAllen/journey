@@ -37,7 +37,7 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-8 p-6">
-      <h1 className="text-2xl font-semibold">Journey</h1>
+      <h1 className="text-2xl font-semibold">우리 언제 만났지?</h1>
       <div className="flex gap-3" aria-label="PIN 입력 상태">
         {[0, 1, 2, 3].map((i) => (
           <span key={i} className={`h-4 w-4 rounded-full border ${i < pin.length ? 'bg-current' : ''}`} />
