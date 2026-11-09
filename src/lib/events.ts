@@ -12,6 +12,7 @@ export type EventRow = {
   ends_at: string | null
   all_day: boolean
   photo_paths: string[]
+  created_at: string
 }
 
 export type Cursor = { ts: string; id: string }
@@ -27,7 +28,7 @@ export type TimelineData = {
 }
 
 export const PAGE_SIZE = 30
-const COLS = 'id,title,note,location,starts_at,ends_at,all_day,photo_paths'
+const COLS = 'id,title,note,location,starts_at,ends_at,all_day,photo_paths,created_at'
 
 /** 과거: 오늘 00:00 이전. cursor 가 있으면 그보다 더 오래된 것. 결과는 오래된 순 */
 export async function fetchPast(cursor?: Cursor): Promise<Page> {

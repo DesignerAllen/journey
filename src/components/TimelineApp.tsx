@@ -10,7 +10,7 @@ export default function TimelineApp() {
   if (data) return <Timeline data={data} />
   return (
     <p className="p-8 text-center text-sm opacity-50">
-      {error ? '불러오지 못했어요. 새로고침 해주세요' : '불러오는 중…'}
+      {error ? '불러오지 못했어요. 새로고침 해주세요' : '좀만 기다려줘엇...'}
     </p>
   )
 }

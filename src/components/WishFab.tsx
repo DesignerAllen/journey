@@ -7,7 +7,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -16,8 +15,22 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import type { Todo } from '@/lib/todos'
 
-export default function WishFab({ onAdded }: { onAdded: (todo: Todo) => void }) {
-  const [open, setOpen] = useState(false)
+type Props = {
+  onAdded: (todo: Todo) => void
+  /** 바깥에서 열고 닫을 때 사용 (없으면 내부 상태) */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  /** false 면 평소엔 숨기고 open 일 때만 보인다 */
+  showTrigger?: boolean
+}
+
+export default function WishFab({ onAdded, open: openProp, onOpenChange, showTrigger = true }: Props) {
+  const [innerOpen, setInnerOpen] = useState(false)
+  const open = openProp ?? innerOpen
+  const setOpen = (o: boolean) => {
+    setInnerOpen(o)
+    onOpenChange?.(o)
+  }
   const [text, setText] = useState('')
   const [confirming, setConfirming] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -48,7 +61,7 @@ export default function WishFab({ onAdded }: { onAdded: (todo: Todo) => void }) 
 
   return (
     <>
-      <div className="pointer-events-none fixed left-1/2 top-14 z-20 w-full max-w-md -translate-x-1/2 px-4">
+      <div className={`pointer-events-none fixed left-1/2 top-16 z-20 w-full max-w-md -translate-x-1/2 px-4 ${!showTrigger && !open ? 'invisible' : ''}`}>
         <div
           className={`pointer-events-auto mx-auto origin-top overflow-hidden rounded-2xl border border-black/10 bg-white shadow-lg transition-all duration-300 ease-out ${open ? 'w-full' : 'w-52'}`}
         >
@@ -97,7 +110,6 @@ export default function WishFab({ onAdded }: { onAdded: (todo: Todo) => void }) 
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>더 고민하고 알려줄거야?</AlertDialogTitle>
-            <AlertDialogDescription>적어둔 내용은 그대로 남아 있어요.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>지금 적을래</AlertDialogCancel>

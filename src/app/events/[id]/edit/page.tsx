@@ -15,7 +15,7 @@ async function Edit({ params }: { params: Promise<{ id: string }> }) {
 
 export default function Page(props: { params: Promise<{ id: string }> }) {
   return (
-    <Suspense fallback={<p className="p-8 text-center text-sm opacity-50">불러오는 중…</p>}>
+    <Suspense fallback={<p className="p-8 text-center text-sm opacity-50">좀만 기다려줘엇...</p>}>
       <Edit params={props.params} />
     </Suspense>
   )

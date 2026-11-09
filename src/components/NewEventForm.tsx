@@ -24,7 +24,14 @@ const field = 'block w-full min-w-0 appearance-none rounded-xl border border-bla
 
 type Props = { defaultDate: string; defaultNote?: string; event?: EventRow }
 
-export default function NewEventForm({ defaultDate, defaultNote = '', event }: Props) {
+// Next 의 화면 상태 보존(Activity) 때문에 이전에 쓰던 입력값이 남아 있으므로,
+// 새로 이동할 때마다(뒤로/앞으로 제외) 폼 상태를 초기화한다
+export default function NewEventForm(props: Props) {
+  const { bfcacheId } = useRouter()
+  return <EventForm key={bfcacheId} {...props} />
+}
+
+function EventForm({ defaultDate, defaultNote = '', event }: Props) {
   const router = useRouter()
   const [date, setDate] = useState(defaultDate)
   const [note, setNote] = useState(defaultNote)
@@ -63,7 +70,7 @@ export default function NewEventForm({ defaultDate, defaultNote = '', event }: P
     try {
       const res = await fetch(`/api/events/${event.id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error()
-      invalidate('timeline', 'month:*', `event:${event.id}`)
+      invalidate('timeline', 'month:*', 'day:*')
       router.replace('/')
       router.refresh()
     } catch {
@@ -105,8 +112,8 @@ export default function NewEventForm({ defaultDate, defaultNote = '', event }: P
       })
       const d = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(d.error ?? '저장에 실패했어요')
-      invalidate('timeline', 'month:*', ...(event ? [`event:${event.id}`] : []))
-      router.replace(event ? `/events/${event.id}` : '/')
+      invalidate('timeline', 'month:*', 'day:*')
+      router.replace(event ? `/days/${date}` : '/')
       router.refresh()
     } catch (e) {
       setError(e instanceof Error ? e.message : '저장에 실패했어요')
@@ -116,10 +123,10 @@ export default function NewEventForm({ defaultDate, defaultNote = '', event }: P
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4 p-4">
-      <header className="flex items-center justify-between">
-        <Link href={event ? `/events/${event.id}` : '/'} className="text-sm">취소</Link>
-        <h1 className="font-semibold">{event ? '일정 수정' : '일정 등록'}</h1>
-        <button type="submit" disabled={(!note.trim() && photos.length === 0) || saving || compressing} className="text-sm font-semibold disabled:opacity-30">
+      <header className="-mt-2 flex h-14 items-center justify-between">
+        <Link href={event ? `/days/${defaultDate}` : '/'} className="py-2 text-base">취소</Link>
+        <h1 className="text-lg font-semibold">{event ? '일정 수정' : '일정 등록'}</h1>
+        <button type="submit" disabled={(!note.trim() && photos.length === 0) || saving || compressing} className="py-2 text-base font-semibold disabled:opacity-30">
           {saving ? '저장 중…' : '저장'}
         </button>
       </header>
@@ -163,7 +170,7 @@ export default function NewEventForm({ defaultDate, defaultNote = '', event }: P
 
       {event && (
         <>
-          <Button type="button" variant="destructive" className="mt-4 h-10 w-full" onClick={() => setConfirmDelete(true)}>
+          <Button type="button" variant="destructive" className="mt-4 h-12 w-full" onClick={() => setConfirmDelete(true)}>
             지울래
           </Button>
           <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>

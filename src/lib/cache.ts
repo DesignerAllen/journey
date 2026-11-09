@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 
 // 화면 데이터를 localStorage 에 저장해 두고, 다시 열 때 먼저 보여준 뒤 서버에서 최신값을 받아 갱신한다.
-const PREFIX = 'journey:v1:'
+// 저장 데이터의 형태가 바뀌면 버전을 올려 이전 캐시를 버린다
+const PREFIX = 'journey:v2:'
 const listeners = new Set<() => void>()
 
 function subscribe(cb: () => void) {
@@ -45,6 +46,15 @@ export function invalidate(...keys: string[]) {
   listeners.forEach((l) => l())
 }
 
+/** 저장된 값이 있으면 바꿔서 다시 저장 (화면에 이미 반영한 변경을 캐시에도 바로 반영할 때) */
+export function updateCache<T>(key: string, fn: (old: T) => T) {
+  const raw = read(key)
+  if (!raw) return
+  try {
+    write(key, JSON.stringify(fn(JSON.parse(raw) as T)))
+  } catch {}
+}
+
 /** 로그아웃 시 전부 삭제 */
 export function clearCache() {
   invalidate('*')
@@ -67,7 +77,7 @@ export function useCached<T>(key: string, url: string): { data: T | null; error:
   }, [raw])
   const [error, setError] = useState(false)
 
-  useEffect(() => {
+  const load = useCallback(() => {
     let alive = true
     fetch(url, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
@@ -82,6 +92,19 @@ export function useCached<T>(key: string, url: string): { data: T | null; error:
       alive = false
     }
   }, [key, url])
+
+  useEffect(() => load(), [load])
+
+  // 표시 중에 저장값이 지워지면(무효화) 로딩 상태로 멈추지 않도록 다시 불러온다
+  const hadData = useRef(false)
+  useEffect(() => {
+    if (raw !== null) {
+      hadData.current = true
+    } else if (hadData.current) {
+      hadData.current = false
+      return load()
+    }
+  }, [raw, load])
 
   return { data, error }
 }
