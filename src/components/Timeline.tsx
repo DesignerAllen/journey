@@ -160,11 +160,11 @@ export default function Timeline({ data }: Props) {
                   </div>
                 </div>
                 {list.length === 0 ? (
-                  <Link href={addHref} className="flex-1" aria-label={`${m}월 ${d}일 일정 등록`} />
+                  <Link href={addHref} prefetch={false} className="flex-1" aria-label={`${m}월 ${d}일 일정 등록`} />
                 ) : (
                   <div className="flex flex-1 flex-col gap-2 p-2">
                     {list.map((ev) => <EventCard key={ev.id} ev={ev} />)}
-                    <Link href={addHref} className="rounded-xl border border-dashed border-black/20 py-2 text-center text-sm opacity-60">
+                    <Link href={addHref} prefetch={false} className="rounded-xl border border-dashed border-black/20 py-2 text-center text-sm opacity-60">
                       <Plus className="mr-1 inline size-3.5" />일정 등록
                     </Link>
                   </div>
