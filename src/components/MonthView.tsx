@@ -3,8 +3,9 @@
 import { LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { addDays, kstKey, parseKey } from '@/lib/date'
+import { clearCache, useCached } from '@/lib/cache'
 import type { EventRow } from '@/lib/events'
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -13,28 +14,18 @@ export default function MonthView({ today }: { today: string }) {
   const router = useRouter()
   async function logout() {
     await fetch('/api/logout', { method: 'POST' })
+    clearCache()
     router.replace('/login')
     router.refresh()
   }
   const [ym, setYm] = useState(() => ({ y: parseKey(today).y, m: parseKey(today).m }))
-  const [events, setEvents] = useState<EventRow[]>([])
-  const [error, setError] = useState(false)
-
   const first = `${ym.y}-${pad(ym.m)}-01`
   const next = ym.m === 12 ? `${ym.y + 1}-01-01` : `${ym.y}-${pad(ym.m + 1)}-01`
   const lead = new Date(`${first}T00:00:00Z`).getUTCDay()
   const daysInMonth = parseKey(addDays(next, -1)).d
 
-  useEffect(() => {
-    let alive = true
-    fetch(`/api/events?from=${first}&to=${next}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => alive && (setEvents(d.events), setError(false)))
-      .catch(() => alive && (setEvents([]), setError(true)))
-    return () => {
-      alive = false
-    }
-  }, [first, next])
+  const { data, error } = useCached<{ events: EventRow[] }>(`month:${first}`, `/api/events?from=${first}&to=${next}`)
+  const events = data?.events ?? []
 
   const byDay = new Map<string, EventRow[]>()
   for (const e of events) {
@@ -66,7 +57,7 @@ export default function MonthView({ today }: { today: string }) {
           <LogOut className="size-5" />
         </button>
       </header>
-      {error && <p className="mb-2 text-center text-sm text-red-500">일정을 불러오지 못했어요</p>}
+      {error && !data && <p className="mb-2 text-center text-sm text-red-500">일정을 불러오지 못했어요</p>}
       <div className="grid grid-cols-7 text-center text-xs opacity-60">
         {['일', '월', '화', '수', '목', '금', '토'].map((w) => <div key={w} className="py-1">{w}</div>)}
       </div>

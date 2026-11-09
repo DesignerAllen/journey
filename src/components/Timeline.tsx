@@ -7,21 +7,32 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import EventCard from '@/components/EventCard'
 import WishFab from '@/components/WishFab'
 import { addDays, kstKey, parseKey, weekday } from '@/lib/date'
-import type { EventRow, Page } from '@/lib/events'
-import type { Todo } from '@/lib/todos'
+import { invalidate } from '@/lib/cache'
+import type { EventRow, Page, TimelineData } from '@/lib/events'
 
 const WINDOW_DAYS = 14 // 일정이 없어도 오늘 기준 앞뒤로 이만큼의 날짜는 항상 보여줌
 const EXTEND_DAYS = 30 // 더보기를 누를 때마다 날짜 범위를 넓히는 일수
 
-type Props = { today: string; initial: { past: Page; today: EventRow[]; future: Page }; todos: Todo[] }
+type Props = { data: TimelineData }
 type Dir = 'past' | 'future'
 
-export default function Timeline({ today, initial, todos: initialTodos }: Props) {
-  const [todos, setTodos] = useState(initialTodos)
-  const [past, setPast] = useState(initial.past.events)
-  const [future, setFuture] = useState(initial.future.events)
-  const [hasMore, setHasMore] = useState({ past: initial.past.hasMore, future: initial.future.hasMore })
+export default function Timeline({ data }: Props) {
+  const { today } = data
+  const [prevData, setPrevData] = useState(data)
+  const [todos, setTodos] = useState(data.todos)
+  const [past, setPast] = useState(data.past.events)
+  const [future, setFuture] = useState(data.future.events)
+  const [hasMore, setHasMore] = useState({ past: data.past.hasMore, future: data.future.hasMore })
   const [win, setWin] = useState({ start: addDays(today, -WINDOW_DAYS), end: addDays(today, WINDOW_DAYS) })
+  // 서버에서 받은 최신 데이터로 교체되면 목록을 새 데이터 기준으로 다시 맞춘다
+  if (data !== prevData) {
+    setPrevData(data)
+    setTodos(data.todos)
+    setPast(data.past.events)
+    setFuture(data.future.events)
+    setHasMore({ past: data.past.hasMore, future: data.future.hasMore })
+    setWin({ start: addDays(today, -WINDOW_DAYS), end: addDays(today, WINDOW_DAYS) })
+  }
   const [busy, setBusy] = useState<Dir | null>(null)
   const [failed, setFailed] = useState<Dir | null>(null)
   const anchor = useRef<{ h: number; y: number } | null>(null)
@@ -77,7 +88,7 @@ export default function Timeline({ today, initial, todos: initialTodos }: Props)
   // 날짜별 그룹: 일정이 있는 날 + 날짜 범위(win) 안의 모든 날(빈 날 포함)
   const groups = new Map<string, EventRow[]>()
   for (let d = win.start; d <= win.end; d = addDays(d, 1)) groups.set(d, [])
-  for (const e of [...past, ...initial.today, ...future]) {
+  for (const e of [...past, ...data.todayEvents, ...future]) {
     const k = kstKey(e.starts_at)
     groups.set(k, [...(groups.get(k) ?? []), e])
   }
@@ -116,7 +127,12 @@ export default function Timeline({ today, initial, todos: initialTodos }: Props)
         </Button>
       </header>
 
-      <WishFab onAdded={(t) => setTodos((l) => [...l.filter((x) => !x.done), t, ...l.filter((x) => x.done)])} />
+      <WishFab
+        onAdded={(t) => {
+          setTodos((l) => [...l.filter((x) => !x.done), t, ...l.filter((x) => x.done)])
+          invalidate('timeline', 'todos')
+        }}
+      />
 
 
       <main className="pt-14">

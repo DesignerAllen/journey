@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { deleteEvent, updateEvent } from '@/lib/events'
+import { deleteEvent, fetchEvent, updateEvent } from '@/lib/events'
 
 const ID_RE = /^[0-9a-f-]{36}$/i
 const TS_RE = /^\d{4}-\d{2}-\d{2}T[\d:.]+(Z|[+-]\d{2}:\d{2})$/
@@ -40,5 +40,15 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
       : NextResponse.json({ error: 'not found' }, { status: 404 })
   } catch {
     return NextResponse.json({ error: '삭제에 실패했어요' }, { status: 500 })
+  }
+}
+
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  try {
+    const ev = await fetchEvent(id)
+    return ev ? NextResponse.json({ event: ev }) : NextResponse.json({ error: 'not found' }, { status: 404 })
+  } catch {
+    return NextResponse.json({ error: 'server error' }, { status: 500 })
   }
 }

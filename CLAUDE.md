@@ -24,7 +24,8 @@ Next.js 16 (App Router, `src/`), React 19, TypeScript, Tailwind 4, Supabase, Ver
 - [src/app/page.tsx](src/app/page.tsx) → [Timeline.tsx](src/components/Timeline.tsx): 메인 타임라인 (날짜별 행, 위/아래 30개씩 '더보기', 빈 날짜 클릭 시 등록)
 - `/month` 월 보기, `/events/new` 등록, `/events/[id]` 상세, `/events/[id]/edit` 수정·삭제, `/wishes` 같이 하고 싶은 것(todos) 목록
 - [src/lib/events.ts](src/lib/events.ts), [todos.ts](src/lib/todos.ts): 서버 전용 DB 접근. [date.ts](src/lib/date.ts): KST 날짜 유틸
-- 사진: 브라우저에서 500KB 이하 JPEG로 압축([compress.ts](src/lib/compress.ts)) → `/api/upload` → 비공개 버킷 `event-photos`, 표시는 `/api/photo` 서명 URL 리다이렉트
+- 로컬 캐시: [cache.ts](src/lib/cache.ts)의 `useCached(key, url)`가 localStorage에 화면 데이터를 저장해 재방문 시 먼저 보여주고 서버 최신값으로 교체(stale-while-revalidate). 메인(`/api/timeline`)·상세·`/wishes`·`/month`가 사용. 데이터를 바꾸는 곳은 `invalidate(...)`로 관련 키를 지우고, 로그아웃 시 `clearCache()`
+- 사진: 브라우저에서 500KB 이하 JPEG로 압축([compress.ts](src/lib/compress.ts)) → `/api/upload` → 비공개 버킷 `event-photos`, 표시는 `/api/photo`가 바이트를 내려주며 immutable 캐시
 - UI: shadcn/ui(base-nova, Base UI) + lucide-react. `cn`은 [utils.ts](src/lib/utils.ts)(clsx+tailwind-merge). `shadcn add` 시 기존 파일 덮어쓰기 금지
 - [supabase/migrations/](supabase/migrations/): DB 스키마
 

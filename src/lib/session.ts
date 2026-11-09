@@ -17,12 +17,13 @@ export async function signSession() {
     .sign(secret())
 }
 
-export async function verifySession(token: string | undefined) {
-  if (!token) return false
+/** 세션이 유효하면 발급 시각(초)을 반환, 아니면 null */
+export async function sessionIssuedAt(token: string | undefined) {
+  if (!token) return null
   try {
-    await jwtVerify(token, secret())
-    return true
+    const { payload } = await jwtVerify(token, secret())
+    return payload.iat ?? null
   } catch {
-    return false
+    return null
   }
 }

@@ -1,6 +1,7 @@
 import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { addDays, dayStartISO, todayKey } from '@/lib/date'
+import type { Todo } from '@/lib/todos'
 
 export type EventRow = {
   id: string
@@ -15,6 +16,15 @@ export type EventRow = {
 
 export type Cursor = { ts: string; id: string }
 export type Page = { events: EventRow[]; hasMore: boolean }
+
+/** 메인 타임라인 화면 한 번에 필요한 데이터 (클라이언트 캐시 대상) */
+export type TimelineData = {
+  today: string
+  past: Page
+  todayEvents: EventRow[]
+  future: Page
+  todos: Todo[]
+}
 
 export const PAGE_SIZE = 30
 const COLS = 'id,title,note,location,starts_at,ends_at,all_day,photo_paths'

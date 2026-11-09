@@ -1,12 +1,11 @@
 import { Suspense } from 'react'
 import { connection } from 'next/server'
-import TodoList from '@/components/TodoList'
+import TodoListApp from '@/components/TodoListApp'
 import { todayKey } from '@/lib/date'
-import { fetchTodos } from '@/lib/todos'
 
 async function Wishes() {
   await connection()
-  return <TodoList initialTodos={await fetchTodos()} today={todayKey()} />
+  return <TodoListApp today={todayKey()} />
 }
 
 export default function Page() {

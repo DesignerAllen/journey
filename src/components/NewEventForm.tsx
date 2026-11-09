@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { invalidate } from '@/lib/cache'
 import { compressImage } from '@/lib/compress'
 import type { EventRow } from '@/lib/events'
 
@@ -62,6 +63,7 @@ export default function NewEventForm({ defaultDate, defaultNote = '', event }: P
     try {
       const res = await fetch(`/api/events/${event.id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error()
+      invalidate('timeline', 'month:*', `event:${event.id}`)
       router.replace('/')
       router.refresh()
     } catch {
@@ -103,6 +105,7 @@ export default function NewEventForm({ defaultDate, defaultNote = '', event }: P
       })
       const d = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(d.error ?? '저장에 실패했어요')
+      invalidate('timeline', 'month:*', ...(event ? [`event:${event.id}`] : []))
       router.replace(event ? `/events/${event.id}` : '/')
       router.refresh()
     } catch (e) {

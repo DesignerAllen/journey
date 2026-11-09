@@ -1,15 +1,9 @@
 import { Suspense } from 'react'
-import { notFound } from 'next/navigation'
-import { connection } from 'next/server'
-import EventDetail from '@/components/EventDetail'
-import { fetchEvent } from '@/lib/events'
+import EventView from '@/components/EventView'
 
 async function Detail({ params }: { params: Promise<{ id: string }> }) {
-  await connection()
   const { id } = await params
-  const ev = await fetchEvent(id)
-  if (!ev) notFound()
-  return <EventDetail ev={ev} />
+  return <EventView id={id} />
 }
 
 export default function Page(props: { params: Promise<{ id: string }> }) {

@@ -15,13 +15,19 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
+import { invalidate } from '@/lib/cache'
 import type { Todo } from '@/lib/todos'
 
-type Props = { initialTodos: Todo[]; today: string }
+type Props = { data: Todo[]; today: string }
 
-export default function TodoList({ initialTodos, today }: Props) {
+export default function TodoList({ data, today }: Props) {
   const router = useRouter()
-  const [todos, setTodos] = useState(initialTodos)
+  const [prevData, setPrevData] = useState(data)
+  const [todos, setTodos] = useState(data)
+  if (data !== prevData) {
+    setPrevData(data)
+    setTodos(data)
+  }
   const [picked, setPicked] = useState<Todo | null>(null)
   const [error, setError] = useState('')
 
@@ -38,6 +44,7 @@ export default function TodoList({ initialTodos, today }: Props) {
       const updated: Todo = await res.json()
       setTodos((l) => [...l.filter((x) => !x.done && x.id !== updated.id), ...l.filter((x) => x.done && x.id !== updated.id), updated])
       const qs = new URLSearchParams({ date: today, note: picked.title })
+      invalidate('todos', 'timeline')
       setPicked(null)
       router.push(`/events/new?${qs}`)
     } catch {
