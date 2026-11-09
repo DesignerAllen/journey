@@ -180,3 +180,14 @@ html {
     @apply font-sans;
   }
 }
+/* 확대 방지: 입력창 글자가 16px 미만이면 iOS 가 포커스 시 화면을 확대하므로 16px 로 고정하고, 핀치/더블탭 확대도 막는다 */
+input,
+textarea,
+select {
+  font-size: 16px !important;
+}
+
+html,
+body {
+  touch-action: pan-x pan-y;
+}

@@ -40,7 +40,7 @@ export default function DayView({ date }: { date: string }) {
                 <div className="grid grid-cols-2 gap-2">
                   {ev.photo_paths.map((p) => (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img key={p} src={`/api/photo?path=${p}`} alt="" className="h-auto w-full rounded-lg" />
+                    <img key={p} src={`/api/photo?path=${p}&w=640`} alt="" className="h-auto w-full rounded-lg" />
                   ))}
                 </div>
               )}

@@ -36,7 +36,7 @@ function EventForm({ defaultDate, defaultNote = '', event }: Props) {
   const [date, setDate] = useState(defaultDate)
   const [note, setNote] = useState(defaultNote)
   const [photos, setPhotos] = useState<Photo[]>(() =>
-    (event?.photo_paths ?? []).map((path) => ({ id: path, path, url: `/api/photo?path=${path}` })),
+    (event?.photo_paths ?? []).map((path) => ({ id: path, path, url: `/api/photo?path=${path}&w=320` })),
   )
   const [compressing, setCompressing] = useState(false)
   const [saving, setSaving] = useState(false)

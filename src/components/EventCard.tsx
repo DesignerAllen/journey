@@ -13,7 +13,7 @@ export default function EventCard({ ev, href }: { ev: EventRow; href: string }) 
         <div className="mt-2 flex gap-2 overflow-x-auto">
           {ev.photo_paths.slice(0, 3).map((p) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={p} src={`/api/photo?path=${p}`} alt="" loading="lazy" className="h-24 w-24 shrink-0 rounded-lg object-cover" />
+            <img key={p} src={`/api/photo?path=${p}&w=320`} alt="" loading="lazy" className="h-24 w-24 shrink-0 rounded-lg object-cover" />
           ))}
         </div>
       )}

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import NoZoom from "@/components/NoZoom";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,6 +21,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   themeColor: "#ffffff",
 };
 
@@ -29,7 +32,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="mx-auto flex min-h-full w-full max-w-md flex-col shadow-sm">{children}</body>
+      <body className="mx-auto flex min-h-full w-full max-w-md flex-col shadow-sm"><NoZoom />
+        {children}
+      </body>
     </html>
   );
 }
